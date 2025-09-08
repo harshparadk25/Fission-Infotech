@@ -1,35 +1,80 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
 import clsx from "clsx";
-import ThemeToggle from "../screen/Theme"; 
+import ThemeToggle from "../screen/Theme";
 
 const navLinks = [
   { label: "Work", href: "#" },
-  { label: "Services", href: "#" },
+  { label: "Services", href: "#", dropdown: "services" },
   { label: "Clients", href: "#" },
-  { label: "About", href: "#" },
+  { label: "About", href: "#", dropdown: "about" },
   { label: "Knowledge", href: "#" },
 ];
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // mobile menu
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("Work");
+  const [dropdown, setDropdown] = useState(null); // desktop dropdown
+  const [mobileDropdown, setMobileDropdown] = useState(null); // mobile dropdown
+  const dropdownRef = useRef(null);
 
-  
+  // Scroll background effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  
+  // Prevent body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
+
+  // Close desktop dropdown when clicking outside
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Dropdown content mapping
+  const dropdownContent = {
+    services: [
+      { title: "Design.", desc: "Handcraft the user experience.", bg: "bg-pink-100", hover: "hover:bg-pink-200" },
+      { title: "Technology.", desc: "Leverage the power of code.", bg: "bg-blue-100", hover: "hover:bg-blue-200" },
+      { title: "Marketing.", desc: "Creative strategies for brands.", bg: "bg-purple-100", hover: "hover:bg-purple-200" },
+    ],
+    about: [
+      { title: "About Us.", desc: "We are super passionate about what we do.", bg: "bg-pink-100", hover: "hover:bg-pink-200" },
+      { title: "Team.", desc: "We are a diverse group of individuals.", bg: "bg-blue-100", hover: "hover:bg-blue-200" },
+      { title: "Career.", desc: "Can you offer such experience?", bg: "bg-purple-100", hover: "hover:bg-purple-200" },
+    ],
+  };
+
+  const renderDropdown = (type, isMobile = false) => (
+    <motion.div
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: 10 }}
+  transition={{ duration: 0.25 }}
+  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-auto max-w-[90vw] flex gap-6 p-4 bg-white dark:bg-gray-900 shadow-lg rounded-lg z-40"
+>
+  {dropdownContent[type].map((item) => (
+    <div key={item.title} className={clsx("p-4 rounded-lg transition flex-1 min-w-[180px]", item.bg, item.hover)}>
+      <h3 className="font-bold text-lg text-gray-800 dark:text-black">{item.title}</h3>
+      <p className="text-sm text-gray-700 dark:text-gray-900">{item.desc}</p>
+      <span className="block mt-2 text-gray-800 dark:text-gray-900">→</span>
+    </div>
+  ))}
+</motion.div>
+
+  );
 
   return (
     <header
@@ -49,11 +94,16 @@ export default function Navbar() {
             </div>
           </a>
 
-          
-          <nav className="hidden lg:flex items-center gap-8 relative">
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-8 relative" ref={dropdownRef}>
             <ul className="flex items-center gap-6 relative">
               {navLinks.map((l) => (
-                <li key={l.label} className="relative">
+                <li
+                  key={l.label}
+                  className="relative"
+                  onMouseEnter={() => setDropdown(l.dropdown || null)}
+                  onMouseLeave={() => setDropdown(null)}
+                >
                   <button
                     onClick={() => setActive(l.label)}
                     className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white relative"
@@ -67,22 +117,28 @@ export default function Navbar() {
                       />
                     )}
                   </button>
+
+                  {/* Desktop Dropdown */}
+                  <AnimatePresence>
+                    {l.dropdown && dropdown === l.dropdown && renderDropdown(l.dropdown)}
+                  </AnimatePresence>
                 </li>
               ))}
             </ul>
 
-            <div className="ml-4">
+            {/* Theme + Contact */}
+            <div className="ml-4 flex items-center gap-4">
               <ThemeToggle />
+              <a
+                href="#contact"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-black dark:bg-white text-white dark:text-black text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition"
+              >
+                Contact
+              </a>
             </div>
-
-            <a
-              href="#contact"
-              className="ml-4 inline-flex items-center gap-2 px-5 py-2 rounded-md bg-black dark:bg-white text-white dark:text-black text-sm font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition"
-            >
-              Contact
-            </a>
           </nav>
 
+          {/* Mobile Hamburger */}
           <div className="lg:hidden">
             <button
               className="p-2 inline-flex items-center justify-center rounded-md"
@@ -95,7 +151,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      
+      {/* Mobile Nav */}
       <AnimatePresence>
         {open && (
           <motion.nav
@@ -108,20 +164,26 @@ export default function Navbar() {
               <div className="px-6 py-6 space-y-4">
                 <ul className="flex flex-col gap-3">
                   {navLinks.map((l) => (
-                    <li key={l.label}>
+                    <li key={l.label} className="flex flex-col relative">
                       <button
-                        onClick={() => {
-                          setActive(l.label);
-                          setOpen(false);
-                        }}
-                        className="text-lg font-medium text-gray-800 dark:text-gray-200"
+                        onClick={() =>
+                          setMobileDropdown(mobileDropdown === l.dropdown ? null : l.dropdown)
+                        }
+                        className="text-lg font-medium text-gray-800 dark:text-gray-200 flex justify-between items-center w-full"
                       >
                         {l.label}
+                        {l.dropdown && <span>{mobileDropdown === l.dropdown ? "▲" : "▼"}</span>}
                       </button>
+
+                      {/* Mobile Dropdown */}
+                      <AnimatePresence>
+                        {l.dropdown && mobileDropdown === l.dropdown && renderDropdown(l.dropdown, true)}
+                      </AnimatePresence>
                     </li>
                   ))}
                 </ul>
-                <div className="flex items-center justify-between">
+
+                <div className="flex items-center justify-between mt-4">
                   <ThemeToggle />
                   <a
                     href="#contact"
