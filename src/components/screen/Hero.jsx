@@ -50,7 +50,7 @@ function AnimatedBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#111"; // could also adapt with theme
+        ctx.fillStyle = "#111"; 
         ctx.fill();
       });
 

@@ -13,26 +13,26 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false); // mobile menu
+  const [open, setOpen] = useState(false); 
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("Work");
-  const [dropdown, setDropdown] = useState(null); // desktop dropdown
-  const [mobileDropdown, setMobileDropdown] = useState(null); // mobile dropdown
+  const [dropdown, setDropdown] = useState(null);
+  const [mobileDropdown, setMobileDropdown] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Scroll background effect
+ 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu open
+  
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
 
-  // Close desktop dropdown when clicking outside
+  
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -43,7 +43,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Dropdown content mapping
+  
   const dropdownContent = {
     services: [
       { title: "Design.", desc: "Handcraft the user experience.", bg: "bg-pink-100", hover: "hover:bg-pink-200" },
@@ -87,14 +87,14 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+         
           <a href="#" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full flex items-center justify-center border-2 border-black dark:border-white">
               <span className="font-extrabold text-sm dark:text-white">leo9</span>
             </div>
           </a>
 
-          {/* Desktop Nav */}
+          
           <nav className="hidden lg:flex items-center gap-8 relative" ref={dropdownRef}>
             <ul className="flex items-center gap-6 relative">
               {navLinks.map((l) => (
@@ -126,7 +126,7 @@ export default function Navbar() {
               ))}
             </ul>
 
-            {/* Theme + Contact */}
+           
             <div className="ml-4 flex items-center gap-4">
               <ThemeToggle />
               <a
@@ -138,7 +138,7 @@ export default function Navbar() {
             </div>
           </nav>
 
-          {/* Mobile Hamburger */}
+         
           <div className="lg:hidden">
             <button
               className="p-2 inline-flex items-center justify-center rounded-md"
@@ -151,7 +151,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
+      
       <AnimatePresence>
         {open && (
           <motion.nav
